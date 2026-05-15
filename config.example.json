@@ -1,0 +1,12 @@
+{
+  "secret_key": "replace-with-a-random-secret-key",
+  "password_hash": "optional-admin-password-hash",
+  "_env_notes": [
+    "也可以改用环境变量：INVEST_SECRET_KEY",
+    "也可以改用环境变量：INVEST_DB_FILE",
+    "也可以改用环境变量：INVEST_CONFIG_FILE",
+    "也可以改用环境变量：INVEST_DATA_FILE",
+    "也可以改用环境变量：INVEST_HOST",
+    "也可以改用环境变量：INVEST_PORT"
+  ]
+}

@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.DS_Store
+app.db
+config.json
+data_backup/
+tests/__pycache__/
+production/

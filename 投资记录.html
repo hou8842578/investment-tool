@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>投资管理工具</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #181a24;
+    --card-hover: #1e2133;
+    --border: #2a2d3e;
+    --text: #e4e6f0;
+    --text-dim: #8b8fa3;
+    --accent: #6c5ce7;
+    --accent-glow: rgba(108,92,231,0.25);
+    --green: #00cec9;
+    --green-dim: rgba(0,206,201,0.15);
+    --red: #ff6b6b;
+    --red-dim: rgba(255,107,107,0.15);
+    --orange: #fdcb6e;
+    --orange-dim: rgba(253,203,110,0.15);
+    --blue: #74b9ff;
+    --blue-dim: rgba(116,185,255,0.15);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+    width: 800px; height: 500px;
+    background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 16px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 头部 */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-left h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #e4e6f0, #6c5ce7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .header-left p { color: var(--text-dim); font-size: 13px; margin-top: 2px; }
+  .header-actions { display: flex; gap: 8px; }
+  .btn {
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #5a4bd6; transform: translateY(-1px); }
+  .btn-outline { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
+  .btn-outline:hover { border-color: var(--text-dim); color: var(--text); }
+  .btn-green { background: var(--green); color: #0f1117; }
+  .btn-green:hover { background: #00b5b1; }
+  .btn-red { background: var(--red); color: #fff; }
+  .btn-red:hover { background: #ee5a5a; }
+  .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 6px; }
+  .btn-icon {
+    width: 30px; height: 30px;
+    padding: 0; border-radius: 6px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 14px; border: 1px solid var(--border);
+    background: transparent; color: var(--text-dim); cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-icon:hover { border-color: var(--text-dim); color: var(--text); background: rgba(255,255,255,0.05); }
+  .btn-icon.danger:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+
+  /* 统计卡片 */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px 16px; position: relative; overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .stat-card .icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-bottom: 10px; }
+  .stat-card .label { font-size: 12px; color: var(--text-dim); margin-bottom: 3px; }
+  .stat-card .value { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .stat-card .sub { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+  .stat-card.purple .icon { background: var(--accent-glow); } .stat-card.purple .value { color: var(--accent); }
+  .stat-card.green .icon { background: var(--green-dim); } .stat-card.green .value { color: var(--green); }
+  .stat-card.orange .icon { background: var(--orange-dim); } .stat-card.orange .value { color: var(--orange); }
+  .stat-card.blue .icon { background: var(--blue-dim); } .stat-card.blue .value { color: var(--blue); }
+
+  /* 标签切换 */
+  .tabs { display: flex; gap: 4px; background: var(--card); border-radius: 10px; padding: 4px; margin-bottom: 18px; width: fit-content; }
+  .tab { padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; color: var(--text-dim); transition: all 0.2s; border: none; background: none; }
+  .tab.active { background: var(--accent); color: #fff; }
+  .tab:not(.active):hover { color: var(--text); background: rgba(255,255,255,0.05); }
+
+  /* 图表 */
+  .chart-section {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px 20px 24px; margin-bottom: 24px;
+  }
+  .chart-section h3 { font-size: 15px; font-weight: 600; margin-bottom: 18px; }
+  .chart-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-top: 4px; }
+  .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 280px; padding: 32px 8px 0; position: relative; }
+  .bar-group { flex: 1; min-width: 44px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .bar { width: 100%; max-width: 40px; border-radius: 6px 6px 2px 2px; transition: height 0.6s cubic-bezier(0.22,1,0.36,1); cursor: pointer; position: relative; min-height: 4px; }
+  .bar:hover { opacity: 0.85; }
+  .bar-label { font-size: 11px; color: var(--text-dim); white-space: nowrap; }
+  .bar-value { font-size: 11px; color: var(--text); font-weight: 600; white-space: nowrap; }
+  .bar-tooltip {
+    position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+    background: #2a2d3e; color: var(--text); padding: 6px 10px; border-radius: 6px;
+    font-size: 12px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 10;
+  }
+  .bar:hover .bar-tooltip { opacity: 1; }
+
+  /* 表格 */
+  .table-section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .table-header {
+    padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px;
+  }
+  .table-header h3 { font-size: 15px; font-weight: 600; }
+  .filter-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .filter-btn {
+    padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer;
+    border: 1px solid var(--border); background: transparent; color: var(--text-dim); transition: all 0.2s;
+  }
+  .filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .filter-btn:not(.active):hover { border-color: var(--text-dim); color: var(--text); }
+  .search-box {
+    padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--text); font-size: 13px; outline: none; width: 130px; transition: border-color 0.2s;
+  }
+  .search-box:focus { border-color: var(--accent); }
+  .search-box::placeholder { color: var(--text-dim); }
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+  thead th {
+    padding: 11px 10px; font-size: 12px; font-weight: 600; color: var(--text-dim);
+    text-align: left; border-bottom: 1px solid var(--border); position: sticky;
+    top: 0; background: var(--card); cursor: pointer; user-select: none; white-space: nowrap;
+  }
+  thead th:hover { color: var(--text); }
+  thead th .sort-icon { margin-left: 3px; font-size: 10px; }
+  tbody tr { transition: background 0.15s; }
+  tbody tr:hover { background: rgba(255,255,255,0.03); }
+  tbody td { padding: 10px 10px; font-size: 13px; border-bottom: 1px solid rgba(42,45,62,0.5); white-space: nowrap; }
+  .amount { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+  .tag.returned { background: var(--green-dim); color: var(--green); }
+  .tag.pending { background: var(--orange-dim); color: var(--orange); }
+  .tag.overdue { background: var(--red-dim); color: var(--red); }
+  .remark { color: var(--text-dim); font-size: 12px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+  .days-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .days-badge.near { background: var(--orange-dim); color: var(--orange); }
+  .days-badge.far { background: var(--green-dim); color: var(--green); }
+  .days-badge.overdue { background: var(--red-dim); color: var(--red); }
+  .action-cell { display: flex; gap: 4px; }
+  .actual-days { color: var(--blue); font-weight: 600; }
+
+  /* 移动端卡片 */
+  .mobile-cards { display: none; padding: 12px; }
+  .m-card {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px; margin-bottom: 10px; transition: border-color 0.15s;
+  }
+  .m-card:hover { border-color: rgba(108,92,231,0.4); }
+  .m-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .m-card-date { font-size: 14px; font-weight: 600; }
+  .m-card-amount { font-size: 16px; font-weight: 700; color: var(--accent); }
+  .m-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; }
+  .m-card-grid .m-label { color: var(--text-dim); }
+  .m-card-grid .m-val { font-weight: 600; }
+  .m-card-grid .m-val.highlight { color: var(--green); }
+  .m-card-grid .m-val.warn { color: var(--orange); }
+  .m-card-grid .m-val.danger { color: var(--red); }
+  .m-card-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .m-card-remark { font-size: 11px; color: var(--text-dim); max-width: 50%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .m-card-actions { display: flex; gap: 6px; }
+
+  /* 分页 */
+  .pagination { display: flex; justify-content: center; align-items: center; gap: 6px; padding: 14px; border-top: 1px solid var(--border); }
+  .page-btn {
+    width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border);
+    background: transparent; color: var(--text-dim); cursor: pointer; font-size: 13px;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+  }
+  .page-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .page-btn:not(.active):hover { border-color: var(--text-dim); color: var(--text); }
+  .empty-state { text-align: center; padding: 40px; color: var(--text-dim); }
+
+  /* 弹窗 */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    z-index: 1000; display: none; align-items: flex-end; justify-content: center; padding: 0;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius) var(--radius) 0 0;
+    width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; animation: modalIn 0.25s ease;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+  .modal-head {
+    padding: 18px 20px 14px; display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-head h3 { font-size: 16px; font-weight: 600; }
+  .modal-close {
+    width: 30px; height: 30px; border-radius: 6px; border: none; background: transparent;
+    color: var(--text-dim); font-size: 18px; cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-close:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+  .modal-body { padding: 18px 20px; }
+  .modal-foot { padding: 14px 20px 18px; display: flex; justify-content: flex-end; gap: 10px; }
+
+  /* 表单 */
+  .form-row { margin-bottom: 14px; }
+  .form-row:last-child { margin-bottom: 0; }
+  .form-label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; color: var(--text-dim); }
+  .form-label .hint { font-weight: 400; font-size: 11px; color: var(--text-dim); opacity: 0.7; margin-left: 6px; }
+  .form-input {
+    width: 100%; padding: 9px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+    background: var(--bg); color: var(--text); font-size: 16px; outline: none; transition: border-color 0.2s;
+    font-family: inherit;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .form-input::placeholder { color: var(--text-dim); opacity: 0.6; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-calc {
+    background: rgba(108,92,231,0.08); border: 1px dashed rgba(108,92,231,0.3);
+    border-radius: var(--radius-sm); padding: 10px 14px; margin-top: 4px;
+    font-size: 13px; color: var(--accent); display: flex; justify-content: space-between; align-items: center;
+  }
+  .form-calc .calc-val { font-weight: 700; font-size: 16px; }
+  .return-summary {
+    background: var(--bg); border-radius: var(--radius-sm); padding: 12px 14px;
+    margin-bottom: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .return-summary .rs-label { font-size: 11px; color: var(--text-dim); }
+  .return-summary .rs-val { font-size: 14px; font-weight: 600; }
+
+  /* Toast */
+  .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    padding: 12px 20px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
+    animation: toastIn 0.3s ease, toastOut 0.3s ease 2.2s forwards;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3); white-space: nowrap;
+  }
+  .toast.success { background: var(--green); color: #0f1117; }
+  .toast.error { background: var(--red); color: #fff; }
+  .toast.info { background: var(--accent); color: #fff; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(-10px); } }
+  .confirm-text { font-size: 14px; color: var(--text); line-height: 1.7; padding: 4px 0; }
+  .confirm-text strong { color: var(--accent); }
+
+  /* ====== 响应式 ====== */
+  @media (min-width: 769px) {
+    .modal-overlay { align-items: center; padding: 16px; }
+    .modal { border-radius: var(--radius); }
+  }
+
+  @media (max-width: 768px) {
+    .container { padding: 14px 10px 80px; }
+    .header h1 { font-size: 20px; }
+    .stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .stat-card { padding: 12px; }
+    .stat-card .value { font-size: 17px; }
+    .stat-card .icon { width: 28px; height: 28px; font-size: 14px; }
+    .chart-section { padding: 14px 12px 18px; }
+    .bar-chart { height: 220px; gap: 6px; padding: 28px 4px 0; }
+    .bar-group { min-width: 36px; }
+    .bar { max-width: 32px; }
+    .bar-value { font-size: 10px; }
+    .bar-label { font-size: 10px; }
+    .tabs { width: 100%; }
+    .tab { flex: 1; text-align: center; padding: 8px 10px; font-size: 13px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-input { font-size: 16px; } /* 防止 iOS 自动缩放 */
+    .header-actions { width: 100%; }
+    .header-actions .btn { flex: 1; justify-content: center; }
+
+    /* 移动端：隐藏表格，显示卡片 */
+    .table-wrap { display: none; }
+    .mobile-cards { display: block; }
+    .table-header { padding: 10px 12px; }
+    .filter-group { width: 100%; }
+    .search-box { flex: 1; width: auto; min-width: 0; }
+  }
+
+  @media (max-width: 480px) {
+    .stats { gap: 6px; }
+    .stat-card { padding: 10px; }
+    .stat-card .value { font-size: 15px; }
+    .stat-card .label { font-size: 11px; }
+    .filter-btn { padding: 5px 10px; font-size: 11px; }
+    .bar-chart { height: 180px; }
+  }
+
+  /* 动画 */
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .stats .stat-card { animation: fadeInUp 0.5s ease both; }
+  .stats .stat-card:nth-child(2) { animation-delay: 0.06s; }
+  .stats .stat-card:nth-child(3) { animation-delay: 0.12s; }
+  .stats .stat-card:nth-child(4) { animation-delay: 0.18s; }
+
+  /* 进度环 */
+  .progress-ring { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+  .ring-svg { width: 48px; height: 48px; }
+  .ring-bg { fill: none; stroke: var(--border); stroke-width: 5; }
+  .ring-fg { fill: none; stroke: var(--green); stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+  .ring-text { font-size: 11px; fill: var(--green); font-weight: 700; }
+  .progress-label { font-size: 11px; color: var(--text-dim); line-height: 1.3; }
+  .progress-label strong { color: var(--text); display: block; font-size: 13px; }
+
+  /* 滚动条 */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+</style>
+</head>
+<body>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- 新增/编辑投资弹窗 -->
+<div class="modal-overlay" id="investModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="investModalTitle">新增投资</h3>
+      <button class="modal-close" onclick="closeModal('investModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId">
+      <div class="form-grid">
+        <div class="form-row">
+          <label class="form-label">投资日期</label>
+          <input class="form-input" type="date" id="fDate">
+        </div>
+        <div class="form-row">
+          <label class="form-label">投资金额（元）</label>
+          <input class="form-input" type="number" id="fAmount" placeholder="如 300000" oninput="calcInvest()">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label class="form-label">利息/万 <span class="hint">每万元收益</span></label>
+          <input class="form-input" type="number" id="fRate" placeholder="如 280" oninput="calcInvest()">
+        </div>
+        <div class="form-row">
+          <label class="form-label">投资天数</label>
+          <input class="form-input" type="number" id="fDays" placeholder="如 35" oninput="calcInvest()">
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">备注</label>
+        <input class="form-input" type="text" id="fRemark" placeholder="可选">
+      </div>
+      <div class="form-calc">
+        <span>利息总额（自动计算）</span>
+        <span class="calc-val" id="calcInterest">¥0</span>
+      </div>
+      <div class="form-calc" style="margin-top:6px;">
+        <span>计划回款日期（自动计算）</span>
+        <span class="calc-val" id="calcReturnDate" style="font-size:14px;">-</span>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('investModal')">取消</button>
+      <button class="btn btn-primary" onclick="saveInvest()">确认保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 回款弹窗 -->
+<div class="modal-overlay" id="returnModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>确认回款</h3>
+      <button class="modal-close" onclick="closeModal('returnModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="returnId">
+      <div class="return-summary" id="returnSummary"></div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label class="form-label">实际回款日期</label>
+          <input class="form-input" type="date" id="fActualDate">
+        </div>
+        <div class="form-row">
+          <label class="form-label">最终利息（元）<span class="hint">如有调整</span></label>
+          <input class="form-input" type="number" id="fFinalInterest" placeholder="默认=利息总额">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label class="form-label">给老谭（元）</label>
+          <input class="form-input" type="number" id="fToLaoTan" placeholder="0">
+        </div>
+        <div class="form-row">
+          <label class="form-label">实际回款月份</label>
+          <input class="form-input" type="month" id="fReturnMonth">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('returnModal')">取消</button>
+      <button class="btn btn-green" onclick="confirmReturn()">确认回款</button>
+    </div>
+  </div>
+</div>
+
+<!-- 删除确认弹窗 -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal" style="max-width:380px;">
+    <div class="modal-head">
+      <h3>确认删除</h3>
+      <button class="modal-close" onclick="closeModal('deleteModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="deleteId">
+      <p class="confirm-text" id="deleteText"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('deleteModal')">取消</button>
+      <button class="btn btn-red" onclick="confirmDelete()">删除</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="header">
+    <div class="header-left">
+      <h1>投资管理工具</h1>
+      <p id="updateTime"></p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" onclick="exportData()">导出数据</button>
+      <button class="btn btn-primary" onclick="openAddModal()">+ 新增投资</button>
+    </div>
+  </div>
+
+  <div class="stats" id="statsArea"></div>
+
+  <div class="tabs">
+    <button class="tab active" data-view="chart">月度利息</button>
+    <button class="tab" data-view="table">投资明细</button>
+  </div>
+
+  <div class="chart-section" id="chartSection">
+    <h3>每月利息收入（按实际回款月份）</h3>
+    <div class="chart-wrapper"><div class="bar-chart" id="barChart"></div></div>
+  </div>
+
+  <div class="table-section" id="tableSection" style="display:none;">
+    <div class="table-header">
+      <h3>投资明细 (<span id="totalCount">0</span>条)</h3>
+      <div class="filter-group">
+        <button class="filter-btn active" data-filter="all">全部</button>
+        <button class="filter-btn" data-filter="pending">待回款</button>
+        <button class="filter-btn" data-filter="returned">已回款</button>
+        <input class="search-box" type="text" placeholder="搜索备注..." id="searchBox">
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-sort="date">投资日期 <span class="sort-icon">↕</span></th>
+            <th data-sort="amount">投资金额 <span class="sort-icon">↕</span></th>
+            <th data-sort="rate">利息/万 <span class="sort-icon">↕</span></th>
+            <th>天数</th>
+            <th>实际天数</th>
+            <th data-sort="returnDate">计划回款 <span class="sort-icon">↕</span></th>
+            <th data-sort="actualDate">实际回款 <span class="sort-icon">↕</span></th>
+            <th data-sort="interest">利息总额 <span class="sort-icon">↕</span></th>
+            <th>状态</th>
+            <th>距回款</th>
+            <th>最终利息</th>
+            <th>给老谭</th>
+            <th>备注</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <!-- 移动端卡片 -->
+    <div class="mobile-cards" id="mobileCards"></div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<script>
+// ===================== 数据层 =====================
+const STORAGE_KEY = 'invest_records_v3';
+const TODAY = new Date().toISOString().slice(0,10);
+
+const INITIAL_DATA = [
+  {id:1,date:"2025-01-17",amount:50000,rate:640,days:0,returnDate:"2025-02-19",actualDate:"2025-02-19",interest:3200,returned:true,returnMonth:"2025-02",finalInterest:3200,toLaoTan:200,remark:""},
+  {id:2,date:"2025-01-28",amount:100000,rate:300,days:0,returnDate:"2025-02-24",actualDate:"2025-02-24",interest:3000,returned:true,returnMonth:"2025-02",finalInterest:3000,toLaoTan:0,remark:""},
+  {id:3,date:"2025-02-14",amount:100000,rate:350,days:27,returnDate:"2025-03-13",actualDate:"2025-03-14",interest:3500,returned:true,returnMonth:"2025-03",finalInterest:3500,toLaoTan:0,remark:""},
+  {id:4,date:"2025-02-21",amount:140000,rate:330,days:28,returnDate:"2025-03-21",actualDate:"2025-03-24",interest:4620,returned:true,returnMonth:"2025-03",finalInterest:4620,toLaoTan:200,remark:""},
+  {id:5,date:"2025-02-20",amount:100000,rate:540,days:38,returnDate:"2025-03-30",actualDate:"2025-04-01",interest:5400,returned:true,returnMonth:"2025-04",finalInterest:5200,toLaoTan:0,remark:""},
+  {id:6,date:"2025-03-03",amount:100000,rate:330,days:27,returnDate:"2025-03-30",actualDate:"2025-04-04",interest:3300,returned:true,returnMonth:"2025-04",finalInterest:3300,toLaoTan:0,remark:""},
+  {id:7,date:"2025-03-17",amount:100000,rate:520,days:38,returnDate:"2025-04-24",actualDate:"2025-05-07",interest:5200,returned:true,returnMonth:"2025-05",finalInterest:5200,toLaoTan:200,remark:""},
+  {id:8,date:"2025-03-24",amount:100000,rate:280,days:27,returnDate:"2025-04-20",actualDate:"2025-04-22",interest:2800,returned:true,returnMonth:"2025-04",finalInterest:2800,toLaoTan:200,remark:""},
+  {id:9,date:"2025-03-27",amount:200000,rate:320,days:28,returnDate:"2025-04-24",actualDate:"2025-04-29",interest:6400,returned:true,returnMonth:"2025-04",finalInterest:6400,toLaoTan:0,remark:""},
+  {id:10,date:"2025-04-03",amount:200000,rate:300,days:28,returnDate:"2025-05-01",actualDate:"2025-05-06",interest:6000,returned:true,returnMonth:"2025-05",finalInterest:6000,toLaoTan:0,remark:""},
+  {id:11,date:"2025-04-21",amount:120000,rate:320,days:28,returnDate:"2025-05-19",actualDate:"2025-05-22",interest:3840,returned:true,returnMonth:"2025-05",finalInterest:3840,toLaoTan:0,remark:""},
+  {id:12,date:"2025-04-28",amount:200000,rate:310,days:30,returnDate:"2025-05-28",actualDate:"2025-05-30",interest:6200,returned:true,returnMonth:"2025-05",finalInterest:6200,toLaoTan:0,remark:""},
+  {id:13,date:"2025-05-03",amount:100000,rate:520,days:46,returnDate:"2025-06-18",actualDate:"2025-06-20",interest:5200,returned:true,returnMonth:"2025-06",finalInterest:5200,toLaoTan:0,remark:""},
+  {id:14,date:"2025-05-01",amount:200000,rate:310,days:30,returnDate:"2025-05-31",actualDate:"2025-06-06",interest:6200,returned:true,returnMonth:"2025-06",finalInterest:6200,toLaoTan:0,remark:""},
+  {id:15,date:"2025-05-07",amount:100000,rate:310,days:30,returnDate:"2025-06-06",actualDate:"2025-06-10",interest:3100,returned:true,returnMonth:"2025-06",finalInterest:3100,toLaoTan:0,remark:""},
+  {id:16,date:"2025-05-08",amount:170000,rate:300,days:30,returnDate:"2025-06-07",actualDate:"2025-06-13",interest:5100,returned:true,returnMonth:"2025-06",finalInterest:5100,toLaoTan:200,remark:""},
+  {id:17,date:"2025-05-26",amount:200000,rate:310,days:28,returnDate:"2025-06-23",actualDate:"2025-06-27",interest:6200,returned:true,returnMonth:"2025-06",finalInterest:6200,toLaoTan:0,remark:""},
+  {id:18,date:"2025-05-26",amount:90000,rate:480,days:39,returnDate:"2025-07-04",actualDate:"2025-07-09",interest:4320,returned:true,returnMonth:"2025-07",finalInterest:4320,toLaoTan:0,remark:""},
+  {id:19,date:"2025-05-30",amount:180000,rate:300,days:30,returnDate:"2025-06-29",actualDate:"2025-07-02",interest:5400,returned:true,returnMonth:"2025-07",finalInterest:5400,toLaoTan:200,remark:""},
+  {id:20,date:"2025-06-08",amount:200000,rate:290,days:30,returnDate:"2025-07-08",actualDate:"2025-07-17",interest:5800,returned:true,returnMonth:"2025-07",finalInterest:5800,toLaoTan:0,remark:""},
+  {id:21,date:"2025-06-08",amount:100000,rate:300,days:30,returnDate:"2025-07-08",actualDate:"2025-07-18",interest:3000,returned:true,returnMonth:"2025-07",finalInterest:0,toLaoTan:0,remark:"青山"},
+  {id:22,date:"2025-06-15",amount:200000,rate:300,days:30,returnDate:"2025-07-15",actualDate:"2025-07-28",interest:6000,returned:true,returnMonth:"2025-07",finalInterest:6000,toLaoTan:0,remark:""},
+  {id:23,date:"2025-06-22",amount:100000,rate:480,days:49,returnDate:"2025-08-10",actualDate:"2025-08-26",interest:4800,returned:true,returnMonth:"2025-08",finalInterest:4800,toLaoTan:0,remark:""},
+  {id:24,date:"2025-06-23",amount:200000,rate:290,days:30,returnDate:"2025-07-23",actualDate:"2025-08-01",interest:5800,returned:true,returnMonth:"2025-08",finalInterest:5800,toLaoTan:0,remark:""},
+  {id:25,date:"2025-07-04",amount:200000,rate:280,days:35,returnDate:"2025-08-08",actualDate:"2025-08-19",interest:5600,returned:true,returnMonth:"2025-08",finalInterest:5600,toLaoTan:200,remark:""},
+  {id:26,date:"2025-07-04",amount:100000,rate:290,days:35,returnDate:"2025-08-08",actualDate:"2025-08-12",interest:2900,returned:true,returnMonth:"2025-08",finalInterest:2900,toLaoTan:0,remark:""},
+  {id:27,date:"2025-07-18",amount:130000,rate:290,days:35,returnDate:"2025-08-22",actualDate:"2025-09-08",interest:3770,returned:true,returnMonth:"2025-09",finalInterest:3770,toLaoTan:0,remark:""},
+  {id:28,date:"2025-07-19",amount:200000,rate:290,days:35,returnDate:"2025-08-23",actualDate:"2025-09-05",interest:5800,returned:true,returnMonth:"2025-09",finalInterest:5800,toLaoTan:0,remark:""},
+  {id:29,date:"2025-07-31",amount:200000,rate:290,days:35,returnDate:"2025-09-04",actualDate:"2025-09-19",interest:5800,returned:true,returnMonth:"2025-09",finalInterest:5800,toLaoTan:200,remark:""},
+  {id:30,date:"2025-07-31",amount:200000,rate:280,days:35,returnDate:"2025-09-04",actualDate:"2025-09-18",interest:5600,returned:true,returnMonth:"2025-09",finalInterest:5600,toLaoTan:0,remark:""},
+  {id:31,date:"2025-08-06",amount:180000,rate:280,days:35,returnDate:"2025-09-10",actualDate:"2025-09-28",interest:5040,returned:true,returnMonth:"2025-09",finalInterest:0,toLaoTan:0,remark:"青山"},
+  {id:32,date:"2025-08-18",amount:200000,rate:290,days:35,returnDate:"2025-09-22",actualDate:"2025-10-13",interest:5800,returned:true,returnMonth:"2025-10",finalInterest:5800,toLaoTan:0,remark:""},
+  {id:33,date:"2025-08-31",amount:50000,rate:300,days:35,returnDate:"2025-10-05",actualDate:"2025-10-17",interest:1500,returned:true,returnMonth:"2025-10",finalInterest:1500,toLaoTan:0,remark:""},
+  {id:34,date:"2025-08-31",amount:200000,rate:280,days:35,returnDate:"2025-10-05",actualDate:"2025-10-20",interest:5600,returned:true,returnMonth:"2025-10",finalInterest:5600,toLaoTan:0,remark:""},
+  {id:35,date:"2025-09-10",amount:200000,rate:280,days:35,returnDate:"2025-10-15",actualDate:"2025-10-31",interest:5600,returned:true,returnMonth:"2025-10",finalInterest:5600,toLaoTan:200,remark:""},
+  {id:36,date:"2025-09-10",amount:50000,rate:290,days:35,returnDate:"2025-10-15",actualDate:"2025-10-30",interest:1450,returned:true,returnMonth:"2025-10",finalInterest:1450,toLaoTan:0,remark:"贴给老谭60000"},
+  {id:37,date:"2025-09-12",amount:200000,rate:280,days:35,returnDate:"2025-10-17",actualDate:"2025-11-06",interest:5600,returned:true,returnMonth:"2025-11",finalInterest:5600,toLaoTan:0,remark:"老谭贴我60000"},
+  {id:38,date:"2025-09-22",amount:200000,rate:280,days:35,returnDate:"2025-10-27",actualDate:"2025-11-14",interest:5600,returned:true,returnMonth:"2025-11",finalInterest:5600,toLaoTan:0,remark:""},
+  {id:39,date:"2025-09-22",amount:140000,rate:280,days:35,returnDate:"2025-10-27",actualDate:"2025-11-14",interest:3920,returned:true,returnMonth:"2025-11",finalInterest:3920,toLaoTan:0,remark:""},
+  {id:40,date:"2025-09-30",amount:200000,rate:280,days:35,returnDate:"2025-11-04",actualDate:"2025-11-21",interest:5600,returned:true,returnMonth:"2025-11",finalInterest:5600,toLaoTan:0,remark:""},
+  {id:41,date:"2025-10-16",amount:70000,rate:270,days:35,returnDate:"2025-11-20",actualDate:"2025-12-05",interest:1890,returned:true,returnMonth:"2025-12",finalInterest:1890,toLaoTan:0,remark:""},
+  {id:42,date:"2025-10-16",amount:200000,rate:280,days:35,returnDate:"2025-11-20",actualDate:"2025-12-09",interest:5600,returned:true,returnMonth:"2025-12",finalInterest:5600,toLaoTan:0,remark:""},
+  {id:43,date:"2025-10-24",amount:80000,rate:280,days:35,returnDate:"2025-11-28",actualDate:"2025-12-17",interest:2240,returned:true,returnMonth:"2025-12",finalInterest:1400,toLaoTan:0,remark:"有青山30000"},
+  {id:44,date:"2025-10-24",amount:200000,rate:280,days:35,returnDate:"2025-11-28",actualDate:"2025-12-19",interest:5600,returned:true,returnMonth:"2025-12",finalInterest:5600,toLaoTan:0,remark:""},
+  {id:45,date:"2025-11-04",amount:240000,rate:290,days:35,returnDate:"2025-12-09",actualDate:"2026-01-06",interest:6960,returned:true,returnMonth:"2026-01",finalInterest:6960,toLaoTan:0,remark:""},
+  {id:46,date:"2025-11-08",amount:300000,rate:280,days:35,returnDate:"2025-12-13",actualDate:"2026-01-15",interest:8400,returned:true,returnMonth:"2026-01",finalInterest:8400,toLaoTan:0,remark:""},
+  {id:47,date:"2025-11-17",amount:300000,rate:280,days:35,returnDate:"2025-12-22",actualDate:"2026-01-21",interest:8400,returned:true,returnMonth:"2026-01",finalInterest:8400,toLaoTan:0,remark:""},
+  {id:48,date:"2025-11-27",amount:300000,rate:280,days:35,returnDate:"2026-01-01",actualDate:"2026-02-02",interest:8400,returned:true,returnMonth:"2026-02",finalInterest:8400,toLaoTan:0,remark:""},
+  {id:49,date:"2025-12-09",amount:90000,rate:280,days:35,returnDate:"2026-01-13",actualDate:"2026-02-11",interest:2520,returned:true,returnMonth:"2026-02",finalInterest:2520,toLaoTan:0,remark:""},
+  {id:50,date:"2025-12-10",amount:300000,rate:280,days:35,returnDate:"2026-01-14",actualDate:"2026-03-06",interest:8400,returned:true,returnMonth:"2026-03",finalInterest:8400,toLaoTan:200,remark:""},
+  {id:51,date:"2025-12-23",amount:300000,rate:280,days:35,returnDate:"2026-01-27",actualDate:"2026-03-12",interest:8400,returned:true,returnMonth:"2026-03",finalInterest:8400,toLaoTan:0,remark:""},
+  {id:52,date:"2026-01-09",amount:300000,rate:280,days:35,returnDate:"2026-02-13",actualDate:"2026-03-24",interest:8400,returned:true,returnMonth:"2026-03",finalInterest:8400,toLaoTan:0,remark:""},
+  {id:53,date:"2026-01-25",amount:300000,rate:280,days:35,returnDate:"2026-03-01",actualDate:"2026-04-10",interest:8400,returned:true,returnMonth:"2026-04",finalInterest:8400,toLaoTan:0,remark:""},
+  {id:54,date:"2026-01-26",amount:300000,rate:280,days:35,returnDate:"2026-03-02",actualDate:"2026-04-17",interest:8400,returned:true,returnMonth:"2026-04",finalInterest:8400,toLaoTan:200,remark:""},
+  {id:55,date:"2026-02-05",amount:300000,rate:290,days:35,returnDate:"2026-03-12",actualDate:"2026-04-24",interest:8700,returned:true,returnMonth:"2026-04",finalInterest:8400,toLaoTan:0,remark:""},
+  {id:56,date:"2026-02-12",amount:200000,rate:290,days:35,returnDate:"2026-03-19",actualDate:"2026-05-08",interest:5800,returned:true,returnMonth:"2026-05",finalInterest:2900,toLaoTan:0,remark:"有青山10万"},
+  {id:57,date:"2026-03-13",amount:300000,rate:280,days:35,returnDate:"2026-04-17",actualDate:null,interest:8400,returned:false,returnMonth:null,finalInterest:null,toLaoTan:0,remark:""},
+  {id:58,date:"2026-03-14",amount:300000,rate:280,days:35,returnDate:"2026-04-18",actualDate:null,interest:8400,returned:false,returnMonth:null,finalInterest:null,toLaoTan:0,remark:""},
+  {id:59,date:"2026-04-03",amount:180000,rate:280,days:35,returnDate:"2026-05-08",actualDate:null,interest:5040,returned:false,returnMonth:null,finalInterest:null,toLaoTan:0,remark:""},
+  {id:60,date:"2026-04-13",amount:220000,rate:280,days:35,returnDate:"2026-05-18",actualDate:null,interest:6160,returned:false,returnMonth:null,finalInterest:null,toLaoTan:0,remark:""},
+  {id:61,date:"2026-04-13",amount:300000,rate:280,days:35,returnDate:"2026-05-18",actualDate:null,interest:8400,returned:false,returnMonth:null,finalInterest:null,toLaoTan:0,remark:""},
+  {id:62,date:"2026-04-21",amount:300000,rate:280,days:35,returnDate:"2026-05-26",actualDate:null,interest:8400,returned:false,returnMonth:null,finalInterest:null,toLaoTan:0,remark:"有青山5万"},
+  {id:63,date:"2026-04-21",amount:300000,rate:280,days:35,returnDate:"2026-05-26",actualDate:null,interest:8400,returned:false,returnMonth:null,finalInterest:null,toLaoTan:0,remark:""},
+];
+
+function loadRecords() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) return JSON.parse(raw);
+  saveRecords(INITIAL_DATA);
+  return INITIAL_DATA;
+}
+function saveRecords(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+let records = loadRecords();
+let nextId = records.length > 0 ? Math.max(...records.map(r => r.id)) + 1 : 1;
+
+// ===================== 工具函数 =====================
+function fmt(n) { return n != null ? n.toLocaleString('zh-CN') : '-'; }
+function fmtMoney(n) { if (n == null) return '-'; if (n >= 10000) return (n / 10000).toFixed(1) + '万'; return n.toLocaleString('zh-CN'); }
+function shortDate(d) { return d ? d.slice(0,10) : '-'; }
+function monthLabel(m) { if (!m) return ''; return m.replace('-0','-').replace('-','/'); }
+function addDays(dateStr, n) { const d = new Date(dateStr); d.setDate(d.getDate() + n); return d.toISOString().slice(0,10); }
+function daysBetween(a, b) { return Math.round((new Date(b) - new Date(a)) / 86400000); }
+function daysToNow(dateStr) { return Math.round((new Date(dateStr) - new Date(TODAY)) / 86400000); }
+function isMobile() { return window.innerWidth <= 768; }
+
+function toast(msg, type='success') {
+  const c = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 2600);
+}
+
+// ===================== 弹窗 =====================
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
+});
+
+// ===================== 新增/编辑投资 =====================
+function openAddModal() {
+  document.getElementById('investModalTitle').textContent = '新增投资';
+  document.getElementById('editId').value = '';
+  document.getElementById('fDate').value = TODAY;
+  document.getElementById('fAmount').value = '';
+  document.getElementById('fRate').value = '';
+  document.getElementById('fDays').value = '35';
+  document.getElementById('fRemark').value = '';
+  document.getElementById('calcInterest').textContent = '¥0';
+  document.getElementById('calcReturnDate').textContent = '-';
+  openModal('investModal');
+}
+
+function openEditModal(id) {
+  const r = records.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('investModalTitle').textContent = '编辑投资';
+  document.getElementById('editId').value = r.id;
+  document.getElementById('fDate').value = r.date;
+  document.getElementById('fAmount').value = r.amount;
+  document.getElementById('fRate').value = r.rate;
+  document.getElementById('fDays').value = r.days;
+  document.getElementById('fRemark').value = r.remark || '';
+  calcInvest();
+  openModal('investModal');
+}
+
+function calcInvest() {
+  const amount = parseFloat(document.getElementById('fAmount').value) || 0;
+  const rate = parseFloat(document.getElementById('fRate').value) || 0;
+  const days = parseInt(document.getElementById('fDays').value) || 0;
+  const date = document.getElementById('fDate').value;
+  const interest = Math.round(amount / 10000 * rate);
+  document.getElementById('calcInterest').textContent = '¥' + fmt(interest);
+  if (date && days > 0) {
+    document.getElementById('calcReturnDate').textContent = addDays(date, days);
+  } else {
+    document.getElementById('calcReturnDate').textContent = '-';
+  }
+}
+
+function saveInvest() {
+  const editId = document.getElementById('editId').value;
+  const date = document.getElementById('fDate').value;
+  const amount = parseFloat(document.getElementById('fAmount').value);
+  const rate = parseFloat(document.getElementById('fRate').value);
+  const days = parseInt(document.getElementById('fDays').value);
+  const remark = document.getElementById('fRemark').value.trim();
+  if (!date || !amount || !rate || !days) { toast('请填写完整信息', 'error'); return; }
+  const interest = Math.round(amount / 10000 * rate);
+  const returnDate = addDays(date, days);
+  if (editId) {
+    const idx = records.findIndex(r => r.id === parseInt(editId));
+    if (idx !== -1) {
+      records[idx] = { ...records[idx], date, amount, rate, days, interest, returnDate, remark };
+      toast('投资记录已更新');
+    }
+  } else {
+    records.push({ id: nextId++, date, amount, rate, days, returnDate, actualDate: null, interest, returned: false, returnMonth: null, finalInterest: null, toLaoTan: 0, remark });
+    toast('新增投资成功');
+  }
+  saveRecords(records);
+  closeModal('investModal');
+  refreshAll();
+}
+
+// ===================== 回款 =====================
+function openReturnModal(id) {
+  const r = records.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('returnId').value = r.id;
+  document.getElementById('fActualDate').value = TODAY;
+  document.getElementById('fFinalInterest').value = r.interest;
+  document.getElementById('fToLaoTan').value = r.toLaoTan || 0;
+  document.getElementById('fReturnMonth').value = TODAY.slice(0,7);
+  document.getElementById('returnSummary').innerHTML = `
+    <div><div class="rs-label">投资金额</div><div class="rs-val">¥${fmt(r.amount)}</div></div>
+    <div><div class="rs-label">计划天数</div><div class="rs-val">${r.days}天</div></div>
+    <div><div class="rs-label">利息总额</div><div class="rs-val" style="color:var(--accent)">¥${fmt(r.interest)}</div></div>
+    <div><div class="rs-label">计划回款</div><div class="rs-val">${shortDate(r.returnDate)}</div></div>`;
+  openModal('returnModal');
+}
+
+function confirmReturn() {
+  const id = parseInt(document.getElementById('returnId').value);
+  const actualDate = document.getElementById('fActualDate').value;
+  const finalInterest = parseInt(document.getElementById('fFinalInterest').value);
+  const toLaoTan = parseInt(document.getElementById('fToLaoTan').value) || 0;
+  const returnMonth = document.getElementById('fReturnMonth').value;
+  if (!actualDate || isNaN(finalInterest)) { toast('请填写回款信息', 'error'); return; }
+  const idx = records.findIndex(r => r.id === id);
+  if (idx !== -1) {
+    records[idx].returned = true;
+    records[idx].actualDate = actualDate;
+    records[idx].finalInterest = finalInterest;
+    records[idx].toLaoTan = toLaoTan;
+    records[idx].returnMonth = returnMonth || actualDate.slice(0,7);
+    saveRecords(records);
+    toast('回款确认成功');
+    closeModal('returnModal');
+    refreshAll();
+  }
+}
+
+// ===================== 删除 =====================
+function openDeleteModal(id) {
+  const r = records.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('deleteId').value = r.id;
+  document.getElementById('deleteText').innerHTML = `确定要删除 <strong>${shortDate(r.date)}</strong> 投资的 <strong>¥${fmt(r.amount)}</strong> 记录吗？`;
+  openModal('deleteModal');
+}
+function confirmDelete() {
+  const id = parseInt(document.getElementById('deleteId').value);
+  records = records.filter(r => r.id !== id);
+  saveRecords(records);
+  toast('记录已删除', 'info');
+  closeModal('deleteModal');
+  refreshAll();
+}
+
+// ===================== 导出 =====================
+function exportData() {
+  const json = JSON.stringify(records, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `投资记录_${TODAY}.json`; a.click();
+  URL.revokeObjectURL(url);
+  toast('数据已导出');
+}
+
+// ===================== 统计 =====================
+function renderStats() {
+  const totalInvested = records.reduce((s,r) => s + r.amount, 0);
+  const pendingAmount = records.filter(r => !r.returned).reduce((s,r) => s + r.amount, 0);
+  const receivedInterest = records.filter(r => r.returned).reduce((s,r) => s + (r.finalInterest || 0), 0);
+  const pendingInterest = records.filter(r => !r.returned).reduce((s,r) => s + r.interest, 0);
+  const returnedCount = records.filter(r => r.returned).length;
+  const totalCount = records.length;
+  const returnRate = totalCount > 0 ? Math.round(returnedCount / totalCount * 100) : 0;
+  const avgRate = totalCount > 0 ? Math.round(records.reduce((s,r)=>s+r.rate,0)/totalCount) : 0;
+  const withDays = records.filter(r => r.days > 0);
+  const avgDays = withDays.length > 0 ? Math.round(withDays.reduce((s,r)=>s+r.days,0)/withDays.length) : 0;
+  const circ = 2 * Math.PI * 20;
+  const offset = circ - (returnRate / 100) * circ;
+  document.getElementById('statsArea').innerHTML = `
+    <div class="stat-card purple"><div class="icon">💰</div><div class="label">累计投资总额</div><div class="value">${fmtMoney(totalInvested)}</div><div class="sub">共 ${totalCount} 笔</div></div>
+    <div class="stat-card green"><div class="icon">✅</div><div class="label">已收利息</div><div class="value">${fmtMoney(receivedInterest)}</div>
+      <div class="progress-ring"><svg class="ring-svg" viewBox="0 0 48 48"><circle class="ring-bg" cx="24" cy="24" r="20"/><circle class="ring-fg" cx="24" cy="24" r="20" stroke-dasharray="${circ}" stroke-dashoffset="${offset}" transform="rotate(-90 24 24)"/><text class="ring-text" x="24" y="28" text-anchor="middle">${returnRate}%</text></svg>
+      <div class="progress-label"><strong>回款进度</strong>${returnedCount}/${totalCount} 笔已回款</div></div></div>
+    <div class="stat-card orange"><div class="icon">⏳</div><div class="label">待回款本金</div><div class="value">${fmtMoney(pendingAmount)}</div><div class="sub">待收利息 ${fmtMoney(pendingInterest)}</div></div>
+    <div class="stat-card blue"><div class="icon">📊</div><div class="label">平均利息/万</div><div class="value">${avgRate}</div><div class="sub">平均周期 ${avgDays} 天</div></div>`;
+}
+
+// ===================== 图表 =====================
+function calcMonthlyInterest() {
+  const map = {};
+  records.forEach(r => { if (r.returnMonth) { map[r.returnMonth] = (map[r.returnMonth] || 0) + (r.finalInterest || 0); } });
+  return Object.keys(map).sort().map(m => ({ month: m, value: map[m] }));
+}
+
+function renderChart() {
+  const data = calcMonthlyInterest();
+  if (!data.length) { document.getElementById('barChart').innerHTML = '<div class="empty-state">暂无回款数据</div>'; return; }
+  const maxVal = Math.max(...data.map(m => m.value));
+  const lastMonth = data[data.length - 1].month;
+  document.getElementById('barChart').innerHTML = data.map(m => {
+    const h = Math.max(4, (m.value / maxVal) * 240);
+    const color = m.month === lastMonth
+      ? 'background: linear-gradient(180deg, var(--orange), #e17055)'
+      : 'background: linear-gradient(180deg, var(--accent), #a29bfe)';
+    return `<div class="bar-group">
+      <div class="bar-value">${m.value >= 10000 ? (m.value/10000).toFixed(1)+'万' : m.value}</div>
+      <div class="bar" style="height:${h}px; ${color}"><div class="bar-tooltip">${monthLabel(m.month)}: ¥${m.value.toLocaleString()}</div></div>
+      <div class="bar-label">${monthLabel(m.month)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ===================== 表格 & 卡片 =====================
+let currentFilter = 'all';
+let currentSearch = '';
+let currentSort = { key: 'date', dir: 'desc' };
+let currentPage = 1;
+const pageSize = 15;
+
+function getFilteredRecords() {
+  let list = [...records];
+  if (currentFilter === 'returned') list = list.filter(r => r.returned);
+  if (currentFilter === 'pending') list = list.filter(r => !r.returned);
+  if (currentSearch) {
+    const q = currentSearch.toLowerCase();
+    list = list.filter(r => (r.remark || '').toLowerCase().includes(q) || r.date.includes(q));
+  }
+  const {key, dir} = currentSort;
+  list.sort((a, b) => {
+    let va, vb;
+    switch(key) {
+      case 'date': va=a.date; vb=b.date; break;
+      case 'amount': va=a.amount; vb=b.amount; break;
+      case 'rate': va=a.rate; vb=b.rate; break;
+      case 'returnDate': va=a.returnDate; vb=b.returnDate; break;
+      case 'actualDate': va=a.actualDate||''; vb=b.actualDate||''; break;
+      case 'interest': va=a.interest; vb=b.interest; break;
+      default: va=a.date; vb=b.date;
+    }
+    return (va < vb ? -1 : va > vb ? 1 : 0) * (dir === 'asc' ? 1 : -1);
+  });
+  return list;
+}
+
+function renderRecord(r) {
+  const actualDays = r.actualDate ? daysBetween(r.date, r.actualDate) : null;
+  let statusTag, daysBadge = '-', daysCls = '';
+  if (r.returned) {
+    statusTag = '<span class="tag returned">已回款</span>';
+  } else {
+    const d = daysToNow(r.returnDate);
+    if (d < 0) { statusTag = '<span class="tag overdue">逾期</span>'; daysCls = 'overdue'; }
+    else { statusTag = '<span class="tag pending">待回款</span>'; daysCls = d <= 7 ? 'near' : 'far'; }
+    let text = d < 0 ? `${Math.abs(d)}天逾期` : d === 0 ? '今日到期' : `${d}天后`;
+    daysBadge = `<span class="days-badge ${daysCls}">${text}</span>`;
+  }
+  const actionHtml = r.returned
+    ? `<button class="btn-icon" title="编辑" onclick="openEditModal(${r.id})">✎</button><button class="btn-icon danger" title="删除" onclick="openDeleteModal(${r.id})">✕</button>`
+    : `<button class="btn btn-green btn-sm" onclick="openReturnModal(${r.id})">回款</button><button class="btn-icon" title="编辑" onclick="openEditModal(${r.id})">✎</button><button class="btn-icon danger" title="删除" onclick="openDeleteModal(${r.id})">✕</button>`;
+  return { actualDays, statusTag, daysBadge, actionHtml };
+}
+
+function renderTable() {
+  const filtered = getFilteredRecords();
+  document.getElementById('totalCount').textContent = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  if (currentPage > totalPages) currentPage = totalPages;
+  const start = (currentPage - 1) * pageSize;
+  const pageData = filtered.slice(start, start + pageSize);
+
+  // 桌面端表格
+  const tbody = document.getElementById('tableBody');
+  if (!pageData.length) {
+    tbody.innerHTML = '<tr><td colspan="14"><div class="empty-state">没有匹配的记录</div></td></tr>';
+  } else {
+    tbody.innerHTML = pageData.map(r => {
+      const { actualDays, statusTag, daysBadge, actionHtml } = renderRecord(r);
+      return `<tr>
+        <td>${shortDate(r.date)}</td>
+        <td class="amount">¥${fmt(r.amount)}</td>
+        <td>${r.rate}</td>
+        <td>${r.days || '-'}</td>
+        <td class="actual-days">${actualDays != null ? actualDays + '天' : '-'}</td>
+        <td>${shortDate(r.returnDate)}</td>
+        <td>${r.actualDate ? shortDate(r.actualDate) : '-'}</td>
+        <td class="amount">¥${fmt(r.interest)}</td>
+        <td>${statusTag}</td>
+        <td>${daysBadge}</td>
+        <td class="amount">${r.finalInterest != null ? '¥'+fmt(r.finalInterest) : '-'}</td>
+        <td>${r.toLaoTan ? '¥'+r.toLaoTan : '-'}</td>
+        <td class="remark" title="${r.remark||''}">${r.remark || '-'}</td>
+        <td><div class="action-cell">${actionHtml}</div></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // 移动端卡片
+  const cards = document.getElementById('mobileCards');
+  if (!pageData.length) {
+    cards.innerHTML = '<div class="empty-state">没有匹配的记录</div>';
+  } else {
+    cards.innerHTML = pageData.map(r => {
+      const { actualDays, statusTag, daysBadge, actionHtml } = renderRecord(r);
+      const d = r.returned ? 0 : daysToNow(r.returnDate);
+      const finalCls = r.returned ? 'highlight' : (d < 0 ? 'danger' : d <= 7 ? 'warn' : '');
+      return `<div class="m-card">
+        <div class="m-card-top">
+          <div><span class="m-card-date">${shortDate(r.date)}</span> ${statusTag}</div>
+          <div class="m-card-amount">¥${fmt(r.amount)}</div>
+        </div>
+        <div class="m-card-grid">
+          <div><div class="m-label">利息/万</div><div class="m-val">${r.rate}</div></div>
+          <div><div class="m-label">计划天数</div><div class="m-val">${r.days || '-'}</div></div>
+          <div><div class="m-label">实际天数</div><div class="m-val" style="color:var(--blue)">${actualDays != null ? actualDays + '天' : '-'}</div></div>
+          <div><div class="m-label">利息总额</div><div class="m-val">¥${fmt(r.interest)}</div></div>
+          <div><div class="m-label">计划回款</div><div class="m-val">${shortDate(r.returnDate)}</div></div>
+          <div><div class="m-label">实际回款</div><div class="m-val">${r.actualDate ? shortDate(r.actualDate) : '-'}</div></div>
+          <div><div class="m-label">最终利息</div><div class="m-val ${finalCls}">${r.finalInterest != null ? '¥'+fmt(r.finalInterest) : '-'}</div></div>
+          <div><div class="m-label">距回款</div><div class="m-val">${daysBadge}</div></div>
+        </div>
+        <div class="m-card-bottom">
+          <div class="m-card-remark">${r.toLaoTan ? '给老谭¥'+r.toLaoTan : ''} ${r.remark || ''}</div>
+          <div class="m-card-actions">${actionHtml}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // 分页
+  const pag = document.getElementById('pagination');
+  if (totalPages <= 1) { pag.innerHTML = ''; return; }
+  let html = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  for (let i = 1; i <= totalPages; i++) {
+    if (totalPages > 7 && i > 2 && i < totalPages - 1 && Math.abs(i - currentPage) > 1) {
+      if (i === 3 || i === totalPages - 2) html += '<span style="color:var(--text-dim);padding:0 4px;">...</span>';
+      continue;
+    }
+    html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  html += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button>`;
+  pag.innerHTML = html;
+}
+
+function goPage(p) {
+  const totalPages = Math.max(1, Math.ceil(getFilteredRecords().length / pageSize));
+  if (p < 1 || p > totalPages) return;
+  currentPage = p;
+  renderTable();
+  // 移动端滚动到列表顶部
+  if (isMobile()) document.getElementById('tableSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function refreshAll() {
+  document.getElementById('updateTime').textContent = '数据更新至 ' + TODAY;
+  renderStats();
+  renderChart();
+  renderTable();
+}
+
+// ===================== 事件 =====================
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const v = tab.dataset.view;
+    document.getElementById('chartSection').style.display = v === 'chart' ? '' : 'none';
+    document.getElementById('tableSection').style.display = v === 'table' ? '' : 'none';
+  });
+});
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    currentPage = 1;
+    renderTable();
+  });
+});
+
+document.getElementById('searchBox').addEventListener('input', e => {
+  currentSearch = e.target.value;
+  currentPage = 1;
+  renderTable();
+});
+
+document.querySelectorAll('thead th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.sort;
+    currentSort = currentSort.key === key ? { key, dir: currentSort.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'desc' };
+    document.querySelectorAll('thead th .sort-icon').forEach(s => s.textContent = '↕');
+    th.querySelector('.sort-icon').textContent = currentSort.dir === 'asc' ? '↑' : '↓';
+    renderTable();
+  });
+});
+
+// ===================== 初始化 =====================
+refreshAll();
+</script>
+</body>
+</html>
