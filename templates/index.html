@@ -26,12 +26,45 @@
 
   /* 头部 */
   .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+  .header-topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; width: 100%; }
+  .header-left { min-width: 0; }
   .header-left h1 {
     font-size: 26px; font-weight: 700; letter-spacing: -0.5px;
     background: linear-gradient(135deg, #e4e6f0, #6c5ce7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   }
   .header-left p { color: var(--text-dim); font-size: 13px; margin-top: 2px; }
-  .header-actions { display: flex; gap: 8px; }
+  .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+  .header-primary-actions, .header-more-wrap { display: flex; align-items: center; gap: 8px; }
+  .header-quick-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .header-quick-btn {
+    min-height: 34px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    justify-content: center;
+  }
+  .header-more-wrap { position: relative; }
+  .header-more-btn { min-width: 104px; justify-content: center; }
+  .header-more-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 180px;
+    padding: 8px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: #181a24;
+    box-shadow: 0 14px 34px rgba(0,0,0,0.3);
+    display: none;
+    z-index: 40;
+  }
+  .header-more-menu.show { display: block; }
+  .header-menu-item {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
   .btn {
     padding: 9px 18px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600;
     cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
@@ -47,6 +80,7 @@
   }
   .btn-icon:hover { border-color: var(--text-dim); color: var(--text); background: rgba(255,255,255,0.05); }
   .btn-icon.danger:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+  .btn-prefix { font-size: 13px; opacity: 0.9; }
 
   /* 统计 */
   .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
@@ -102,7 +136,7 @@
   }
   .bar:hover .bar-tooltip { opacity: 1; }
 
-  /* 横向条形图（移动端） */
+  /* 横向条形图（备用） */
   .h-chart { display: none; }
   .h-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
   .h-label { font-size: 12px; color: var(--text-dim); width: 42px; text-align: right; flex-shrink: 0; }
@@ -110,9 +144,8 @@
   .h-fill { height: 100%; border-radius: 6px; transition: width 0.6s cubic-bezier(0.22,1,0.36,1); display: flex; align-items: center; padding-left: 10px; }
   .h-fill-text { font-size: 11px; font-weight: 600; color: #fff; white-space: nowrap; text-shadow: 0 1px 3px rgba(0,0,0,0.4); }
 
-  @media (max-width: 768px) {
-    .bar-chart { display: none; }
-    .h-chart { display: block; }
+  .bar-chart.desktop-like {
+    min-width: 720px;
   }
 
   /* 年度汇总 */
@@ -149,6 +182,8 @@
   thead th:hover { color: var(--text); } thead th .sort-icon { margin-left: 3px; font-size: 10px; }
   tbody tr { transition: background 0.15s; } tbody tr:hover { background: rgba(255,255,255,0.03); }
   tbody td { padding: 10px 10px; font-size: 13px; border-bottom: 1px solid rgba(42,45,62,0.5); white-space: nowrap; }
+  th:nth-child(1), td:nth-child(1) { min-width: 92px; }
+  th:nth-child(2), td:nth-child(2) { min-width: 118px; }
   .amount { font-weight: 600; font-variant-numeric: tabular-nums; }
   .tag { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
   .tag.returned { background: var(--green-dim); color: var(--green); } .tag.pending { background: var(--orange-dim); color: var(--orange); } .tag.overdue { background: var(--red-dim); color: var(--red); }
@@ -252,11 +287,147 @@
     .container { padding: 14px 10px 80px; } .header h1 { font-size: 20px; }
     .stats { grid-template-columns: repeat(2, 1fr); gap: 8px; } .stat-card { padding: 12px; } .stat-card .value { font-size: 17px; } .stat-card .icon { width: 28px; height: 28px; font-size: 14px; }
     .chart-section { padding: 14px 12px 18px; }
+    .chart-wrapper { margin: 0 -2px; padding: 4px 2px 0; }
+    .bar-chart { gap: 10px; padding-top: 24px; }
+    .bar-group { min-width: 52px; }
+    .bar { max-width: 44px; }
+    .bar-label, .bar-value { font-size: 12px; }
     .tabs { width: 100%; } .tab { flex: 1; text-align: center; padding: 8px 10px; font-size: 13px; }
     .form-grid { grid-template-columns: 1fr; }
-    .header-actions { width: 100%; } .header-actions .btn { flex: 1; justify-content: center; }
-    .table-wrap { display: none; } .mobile-cards { display: block; }
+    .header {
+      align-items: stretch;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      box-shadow: none;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .header-left {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    .header-topbar {
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .header-left h1 { font-size: 21px; line-height: 1.12; }
+    .header-left p {
+      margin-top: 0;
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      max-width: 100%;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(108,92,231,0.18);
+      background: rgba(108,92,231,0.08);
+      color: #bdb7ff;
+      font-size: 11px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .header-quick-actions { gap: 6px; }
+    .header-quick-btn {
+      min-height: 32px;
+      padding: 6px 10px;
+      font-size: 12px;
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.08);
+    }
+    .header-actions {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 8px;
+      justify-content: flex-start;
+      overflow: visible;
+    }
+    .header-primary-actions, .header-more-wrap {
+      width: auto;
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 8px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      box-shadow: none;
+    }
+    .header-primary-actions .btn,
+    .header-more-wrap .btn {
+      width: auto;
+      min-height: 36px;
+      padding: 8px 12px;
+      white-space: nowrap;
+      justify-content: center;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+    .header-primary-actions { flex: 1; }
+    .header-primary-actions .btn { flex: 1; }
+    .header-more-wrap { flex: 0 0 auto; }
+    .header-more-btn {
+      min-width: 88px;
+    }
+    .header-more-wrap .btn {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.08);
+    }
+    .header-more-menu {
+      top: calc(100% + 10px);
+      right: 0;
+      min-width: 176px;
+    }
+    .table-wrap {
+      position: relative;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+    .table-wrap table { min-width: 980px; }
+    .table-wrap th:nth-child(1),
+    .table-wrap td:nth-child(1),
+    .table-wrap th:nth-child(2),
+    .table-wrap td:nth-child(2) {
+      position: sticky;
+    }
+    .table-wrap th:nth-child(1) {
+      left: 0;
+      z-index: 6;
+      background: var(--card);
+    }
+    .table-wrap td:nth-child(1) {
+      left: 0;
+      z-index: 3;
+      background: #181a24;
+    }
+    .table-wrap th:nth-child(2) {
+      left: 92px;
+      z-index: 5;
+      background: var(--card);
+      box-shadow: 10px 0 16px -12px rgba(0,0,0,0.55);
+    }
+    .table-wrap td:nth-child(2) {
+      left: 92px;
+      z-index: 2;
+      background: #181a24;
+      box-shadow: 10px 0 16px -12px rgba(0,0,0,0.55);
+    }
+    .table-wrap tbody tr:hover td:nth-child(1),
+    .table-wrap tbody tr:hover td:nth-child(2) {
+      background: #1e2133;
+    }
+    .table-wrap { display: block; }
+    .mobile-cards { display: none; }
     .table-header { padding: 10px 12px; } .filter-group { width: 100%; } .search-box { flex: 1; width: auto; min-width: 0; }
+    .table-wrap table { min-width: 920px; }
     .year-grid { grid-template-columns: 1fr; }
     .admin-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .admin-rank-grid { grid-template-columns: 1fr; gap: 10px; }
@@ -316,7 +487,7 @@
         <div class="form-row"><label class="form-label">合作出资（元）</label><input class="form-input" type="number" id="fPartnerAmount" placeholder="默认 0"></div>
       </div>
       <div class="form-row"><label class="form-label">备注</label><input class="form-input" type="text" id="fRemark" placeholder="可选"></div>
-      <div class="form-calc"><span>利息总额（自动计算）</span><span class="calc-val" id="calcInterest">¥0</span></div>
+      <div class="form-calc"><span>计划总利息（自动计算）</span><span class="calc-val" id="calcInterest">¥0</span></div>
       <div class="form-calc" style="margin-top:6px"><span>计划回款日期（自动计算）</span><span class="calc-val" id="calcReturnDate" style="font-size:14px">-</span></div>
     </div>
     <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('investModal')">取消</button><button class="btn btn-primary" onclick="saveInvest()">确认保存</button></div>
@@ -326,20 +497,20 @@
 <!-- 回款弹窗 -->
 <div class="modal-overlay" id="returnModal">
   <div class="modal">
-    <div class="modal-head"><h3>确认回款</h3><button class="modal-close" onclick="closeModal('returnModal')">&times;</button></div>
+    <div class="modal-head"><h3 id="returnModalTitle">确认回款</h3><button class="modal-close" onclick="closeModal('returnModal')">&times;</button></div>
     <div class="modal-body">
       <input type="hidden" id="returnId">
       <div class="return-summary" id="returnSummary"></div>
       <div class="form-grid">
         <div class="form-row"><label class="form-label">实际回款日期</label><input class="form-input" type="date" id="fActualDate"></div>
-        <div class="form-row"><label class="form-label">最终利息（元）<span class="hint">如有调整</span></label><input class="form-input" type="number" id="fFinalInterest" placeholder="默认=利息总额"></div>
+        <div class="form-row"><label class="form-label">实际总利息（元）<span class="hint">如有调整</span></label><input class="form-input" type="number" id="fFinalInterest" placeholder="默认=计划总利息"></div>
       </div>
       <div class="form-grid">
         <div class="form-row"><label class="form-label">服务费（元）</label><input class="form-input" type="number" id="fToLaoTan" placeholder="0"></div>
         <div class="form-row"><label class="form-label">实际回款月份</label><input class="form-input" type="month" id="fReturnMonth"></div>
       </div>
     </div>
-    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('returnModal')">取消</button><button class="btn btn-green" onclick="confirmReturn()">确认回款</button></div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('returnModal')">取消</button><button class="btn btn-green" id="returnSubmitBtn" onclick="confirmReturn()">确认回款</button></div>
   </div>
 </div>
 
@@ -367,14 +538,25 @@
 
 <div class="container">
   <div class="header">
-    <div class="header-left"><h1>投资管理工具</h1><p id="updateTime"></p></div>
+    <div class="header-topbar">
+      <div class="header-left"><h1>投资管理工具</h1><p id="updateTime"></p></div>
+      <div class="header-quick-actions">
+        <button class="btn btn-outline header-quick-btn" onclick="openModal('pwdModal')" title="修改密码">修改密码</button>
+        <button class="btn btn-outline header-quick-btn" onclick="doLogout()" title="退出登录">退出登录</button>
+      </div>
+    </div>
     <div class="header-actions">
-      <button class="btn btn-outline" id="adminEntryBtn" onclick="showTab('admin')" style="display:none">管理员后台</button>
-      <button class="btn btn-outline" onclick="exportExcel()">导出Excel</button>
-      <button class="btn btn-outline" onclick="exportData()">导出JSON</button>
-      <button class="btn btn-primary" onclick="openAddModal()">+ 新增投资</button>
-      <button class="btn-icon" onclick="openModal('pwdModal')" title="修改密码">⚙</button>
-      <button class="btn-icon danger" onclick="doLogout()" title="退出登录">⏻</button>
+      <div class="header-primary-actions">
+        <button class="btn btn-primary" onclick="openAddModal()">+ 新增投资</button>
+      </div>
+      <div class="header-more-wrap">
+        <button class="btn btn-outline header-more-btn" id="moreMenuBtn" onclick="toggleMoreMenu(event)"><span class="btn-prefix">⋯</span><span>更多</span></button>
+        <div class="header-more-menu" id="headerMoreMenu">
+          <button class="btn btn-outline header-menu-item" id="adminEntryBtn" onclick="handleMoreAction('admin')" style="display:none"><span class="btn-prefix">⌘</span><span>管理员后台</span></button>
+          <button class="btn btn-outline header-menu-item" onclick="handleMoreAction('excel')"><span class="btn-prefix">⇩</span><span>导出 Excel</span></button>
+          <button class="btn btn-outline header-menu-item" onclick="handleMoreAction('json')"><span class="btn-prefix">{ }</span><span>导出 JSON</span></button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -392,13 +574,13 @@
     <button class="tab" data-view="admin" id="adminTab" style="display:none">管理员后台</button>
   </div>
 
-  <div class="chart-section" id="chartSection"><h3>每月利息收入（按实际回款月份）</h3><div class="chart-wrapper"><div class="bar-chart" id="barChart"></div><div class="h-chart" id="hChart"></div></div></div>
+  <div class="chart-section" id="chartSection"><h3>每月实际利息（按实际回款月份）</h3><div class="chart-legend"><span><span class="legend-dot" style="background:var(--accent)"></span>总利息</span><span><span class="legend-dot" style="background:var(--green)"></span>我的利息</span></div><div class="chart-wrapper"><div class="bar-chart desktop-like" id="barChart"></div><div class="h-chart" id="hChart"></div></div></div>
   <div class="chart-section" id="daysSection" style="display:none">
     <h3>每月平均实际投资天数</h3>
     <div class="chart-legend"><span><span class="legend-dot" style="background:var(--accent)"></span>计划天数</span><span><span class="legend-dot" style="background:var(--orange)"></span>实际天数</span></div>
-    <div class="chart-wrapper"><div class="bar-chart" id="daysBarChart"></div><div class="h-chart" id="daysHChart"></div></div>
+    <div class="chart-wrapper"><div class="bar-chart desktop-like" id="daysBarChart"></div><div class="h-chart" id="daysHChart"></div></div>
   </div>
-  <div class="chart-section" id="rateSection" style="display:none"><h3>每月平均利率趋势（利息/万）</h3><div class="chart-wrapper"><div class="bar-chart" id="rateBarChart"></div><div class="h-chart" id="rateHChart"></div></div></div>
+  <div class="chart-section" id="rateSection" style="display:none"><h3>每月平均利率趋势（利息/万）</h3><div class="chart-wrapper"><div class="bar-chart desktop-like" id="rateBarChart"></div><div class="h-chart" id="rateHChart"></div></div></div>
   <div id="yearSection" style="display:none"></div>
   <div id="partnerSection" style="display:none"></div>
   <div id="adminSection" style="display:none"></div>
@@ -421,8 +603,8 @@
           <th>天数</th><th>实际天数</th>
           <th data-sort="returnDate">计划回款 <span class="sort-icon">↕</span></th>
           <th data-sort="actualDate">实际回款 <span class="sort-icon">↕</span></th>
-          <th data-sort="interest">利息总额 <span class="sort-icon">↕</span></th>
-          <th>状态</th><th>距回款</th><th>最终利息</th><th>服务费</th><th>备注</th><th>操作</th>
+          <th data-sort="interest">计划总利息 <span class="sort-icon">↕</span></th>
+          <th>我的计划利息</th><th>状态</th><th>距回款</th><th>实际总利息</th><th>我的实际利息</th><th>服务费</th><th>备注</th><th>操作</th>
         </tr></thead>
         <tbody id="tableBody"></tbody>
       </table>
@@ -623,14 +805,38 @@ function monthLabel(m) { if (!m) return ''; return m.replace('-0','-').replace('
 function addDays(s, n) { const d = new Date(s); d.setDate(d.getDate() + n); return d.toISOString().slice(0,10); }
 function daysBetween(a, b) { return Math.round((new Date(b) - new Date(a)) / 86400000); }
 function daysToNow(s) { return Math.round((new Date(s) - new Date(TODAY)) / 86400000); }
+function splitInterest(totalInterest, amount, partnerAmount) {
+  const total = totalInterest || 0;
+  const totalAmount = amount || 0;
+  const partner = partnerAmount || 0;
+  if (!totalAmount || !partner || !total) return { mine: total, partner: 0 };
+  const partnerInterest = Math.round(total * partner / totalAmount);
+  return { mine: total - partnerInterest, partner: partnerInterest };
+}
 function isMobile() { return window.innerWidth <= 768; }
 function updateHeaderUser() { document.getElementById('updateTime').textContent = currentUsername ? ('当前账号：' + currentUsername + (isAdmin ? ' · 管理员' : '')) : '请先登录'; }
+function closeMoreMenu() {
+  const menu = document.getElementById('headerMoreMenu');
+  if (menu) menu.classList.remove('show');
+}
+function toggleMoreMenu(event) {
+  if (event) event.stopPropagation();
+  const menu = document.getElementById('headerMoreMenu');
+  if (menu) menu.classList.toggle('show');
+}
+function handleMoreAction(action) {
+  closeMoreMenu();
+  if (action === 'admin') showTab('admin');
+  else if (action === 'excel') exportExcel();
+  else if (action === 'json') exportData();
+}
 function updateAdminVisibility() {
   const tab = document.getElementById('adminTab');
   const entry = document.getElementById('adminEntryBtn');
   const visible = !!isAdmin;
   tab.style.display = visible ? '' : 'none';
   entry.style.display = visible ? '' : 'none';
+  if (!visible) closeMoreMenu();
   if (!visible && document.querySelector('.tab.active')?.dataset.view === 'admin') showTab('chart');
 }
 
@@ -644,6 +850,13 @@ function toast(msg, type='success') {
 function openModal(id) { document.getElementById(id).classList.add('show'); }
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 document.querySelectorAll('.modal-overlay').forEach(m => { m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); }); });
+document.addEventListener('click', e => {
+  const wrap = document.querySelector('.header-more-wrap');
+  if (wrap && !wrap.contains(e.target)) closeMoreMenu();
+});
+window.addEventListener('resize', () => {
+  if (!isMobile()) closeMoreMenu();
+});
 
 // ===================== 新增/编辑 =====================
 function openAddModal() {
@@ -716,27 +929,31 @@ async function saveInvest() {
 function openReturnModal(id) {
   const r = records.find(x => x.id === id); if (!r) return;
   document.getElementById('returnId').value = r.id;
-  document.getElementById('fActualDate').value = TODAY;
-  document.getElementById('fFinalInterest').value = r.interest;
+  const isReturned = !!r.returned;
+  document.getElementById('returnModalTitle').textContent = isReturned ? '编辑回款' : '确认回款';
+  document.getElementById('returnSubmitBtn').textContent = isReturned ? '保存回款信息' : '确认回款';
+  document.getElementById('fActualDate').value = r.actualDate || TODAY;
+  document.getElementById('fFinalInterest').value = r.finalInterest != null ? r.finalInterest : r.interest;
   document.getElementById('fToLaoTan').value = r.toLaoTan || 0;
-  document.getElementById('fReturnMonth').value = TODAY.slice(0,7);
+  document.getElementById('fReturnMonth').value = r.returnMonth || (r.actualDate ? r.actualDate.slice(0,7) : TODAY.slice(0,7));
   document.getElementById('returnSummary').innerHTML = `
     <div><div class="rs-label">投资金额</div><div class="rs-val">¥${fmt(r.amount)}</div></div>
     <div><div class="rs-label">计划天数</div><div class="rs-val">${r.days}天</div></div>
-    <div><div class="rs-label">利息总额</div><div class="rs-val" style="color:var(--accent)">¥${fmt(r.interest)}</div></div>
+    <div><div class="rs-label">计划总利息</div><div class="rs-val" style="color:var(--accent)">¥${fmt(r.interest)}</div></div>
     <div><div class="rs-label">计划回款</div><div class="rs-val">${shortDate(r.returnDate)}</div></div>`;
   openModal('returnModal');
 }
 
 async function confirmReturn() {
   const id = parseInt(document.getElementById('returnId').value);
+  const r = records.find(x => x.id === id);
   const actualDate = document.getElementById('fActualDate').value;
   const finalInterest = parseInt(document.getElementById('fFinalInterest').value);
   const toLaoTan = parseInt(document.getElementById('fToLaoTan').value) || 0;
   const returnMonth = document.getElementById('fReturnMonth').value;
   if (!actualDate || isNaN(finalInterest)) { toast('请填写回款信息', 'error'); return; }
   await api('/api/records/' + id + '/return', 'POST', { actualDate, finalInterest, toLaoTan, returnMonth });
-  toast('回款确认成功');
+  toast(r && r.returned ? '回款信息已更新' : '回款确认成功');
   closeModal('returnModal');
   await loadRecords();
 }
@@ -907,15 +1124,15 @@ function renderAlerts() {
 
 // ===================== 统计 =====================
 function renderStats() {
-  const stats = dashboard.summary || { totalInvested: 0, pendingAmount: 0, receivedInterest: 0, pendingInterest: 0, returnedCount: 0, totalCount: 0, returnRate: 0, avgRate: 0, avgDays: 0 };
+  const stats = dashboard.summary || { totalInvested: 0, myInvested: 0, pendingAmount: 0, myPendingAmount: 0, receivedInterest: 0, myReceivedInterest: 0, pendingInterest: 0, myPendingInterest: 0, returnedCount: 0, totalCount: 0, returnRate: 0, avgRate: 0, avgDays: 0 };
   const circ = 2 * Math.PI * 20;
   const offset = circ - (stats.returnRate / 100) * circ;
   document.getElementById('statsArea').innerHTML = `
-    <div class="stat-card purple"><div class="icon">💰</div><div class="label">累计投资总额</div><div class="value">${fmtMoney(stats.totalInvested)}</div><div class="sub">共 ${stats.totalCount} 笔</div></div>
-    <div class="stat-card green"><div class="icon">✅</div><div class="label">已收利息</div><div class="value">${fmtMoney(stats.receivedInterest)}</div>
+    <div class="stat-card purple"><div class="icon">💰</div><div class="label">累计总本金</div><div class="value">${fmtMoney(stats.totalInvested)}</div><div class="sub">我的本金 ${fmtMoney(stats.myInvested)} · 共 ${stats.totalCount} 笔</div></div>
+    <div class="stat-card green"><div class="icon">✅</div><div class="label">已收总利息</div><div class="value">${fmtMoney(stats.receivedInterest)}</div><div class="sub">我的已收利息 ${fmtMoney(stats.myReceivedInterest)}</div>
       <div class="progress-ring"><svg class="ring-svg" viewBox="0 0 48 48"><circle class="ring-bg" cx="24" cy="24" r="20"/><circle class="ring-fg" cx="24" cy="24" r="20" stroke-dasharray="${circ}" stroke-dashoffset="${offset}" transform="rotate(-90 24 24)"/><text class="ring-text" x="24" y="28" text-anchor="middle">${stats.returnRate}%</text></svg>
       <div class="progress-label"><strong>回款进度</strong>${stats.returnedCount}/${stats.totalCount} 笔已回款</div></div></div>
-    <div class="stat-card orange"><div class="icon">⏳</div><div class="label">待回款本金</div><div class="value">${fmtMoney(stats.pendingAmount)}</div><div class="sub">待收利息 ${fmtMoney(stats.pendingInterest)}</div></div>
+    <div class="stat-card orange"><div class="icon">⏳</div><div class="label">待回款总本金</div><div class="value">${fmtMoney(stats.pendingAmount)}</div><div class="sub">我的待回款本金 ${fmtMoney(stats.myPendingAmount)} · 我的待收利息 ${fmtMoney(stats.myPendingInterest)}</div></div>
     <div class="stat-card blue"><div class="icon">📊</div><div class="label">平均利息/万</div><div class="value">${stats.avgRate}</div><div class="sub">平均实际周期 ${stats.avgDays} 天</div></div>`;
 }
 
@@ -927,21 +1144,33 @@ function renderChart() {
     document.getElementById('hChart').innerHTML = '<div class="empty-state">暂无回款数据</div>';
     return;
   }
-  const maxVal = Math.max(...data.map(m => m.value));
-  const lastMonth = data[data.length - 1].month;
+  const maxVal = Math.max(...data.map(m => Math.max(m.value || 0, m.myValue || 0)), 1);
 
   document.getElementById('barChart').innerHTML = data.map(m => {
-    const h = Math.max(4, (m.value / maxVal) * 240);
-    const color = m.month === lastMonth ? 'background: linear-gradient(180deg, var(--orange), #e17055)' : 'background: linear-gradient(180deg, var(--accent), #a29bfe)';
-    return `<div class="bar-group"><div class="bar-value">${m.value >= 10000 ? (m.value/10000).toFixed(1)+'万' : m.value}</div><div class="bar" style="height:${h}px; ${color}"><div class="bar-tooltip">${monthLabel(m.month)}: ¥${m.value.toLocaleString()}</div></div><div class="bar-label">${monthLabel(m.month)}</div></div>`;
+    const totalHeight = Math.max(4, (m.value / maxVal) * 240);
+    const myHeight = Math.max(4, ((m.myValue || 0) / maxVal) * 240);
+    return `<div class="bar-group" style="gap:4px">
+      <div class="bar-value" style="font-size:10px">${m.value >= 10000 ? (m.value / 10000).toFixed(1) + '万' : fmt(m.value)}</div>
+      <div style="display:flex;gap:3px;align-items:flex-end;height:240px">
+        <div class="bar" style="height:${totalHeight}px;width:16px;background:linear-gradient(180deg,var(--accent),#a29bfe);border-radius:4px 4px 1px 1px" title="${monthLabel(m.month)} 总利息: ¥${(m.value || 0).toLocaleString()}"></div>
+        <div class="bar" style="height:${myHeight}px;width:16px;background:linear-gradient(180deg,var(--green),#00b894);border-radius:4px 4px 1px 1px" title="${monthLabel(m.month)} 我的利息: ¥${(m.myValue || 0).toLocaleString()}"></div>
+      </div>
+      <div class="bar-label">${monthLabel(m.month)}</div>
+    </div>`;
   }).join('');
 
   document.getElementById('hChart').innerHTML = data.map(m => {
-    const w = Math.max(6, (m.value / maxVal) * 100);
-    const isLast = m.month === lastMonth;
-    const bg = isLast ? 'background: linear-gradient(90deg, var(--orange), #e17055)' : 'background: linear-gradient(90deg, var(--accent), #a29bfe)';
-    const val = m.value >= 10000 ? (m.value/10000).toFixed(1)+'万' : '¥'+m.value.toLocaleString();
-    return `<div class="h-row"><div class="h-label">${monthLabel(m.month)}</div><div class="h-track"><div class="h-fill" style="width:${w}%; ${bg}"><span class="h-fill-text">${val}</span></div></div></div>`;
+    const totalWidth = Math.max(6, ((m.value || 0) / maxVal) * 100);
+    const myWidth = Math.max(6, ((m.myValue || 0) / maxVal) * 100);
+    const totalVal = (m.value || 0) >= 10000 ? (m.value / 10000).toFixed(1) + '万' : '¥' + (m.value || 0).toLocaleString();
+    const myVal = (m.myValue || 0) >= 10000 ? (m.myValue / 10000).toFixed(1) + '万' : '¥' + (m.myValue || 0).toLocaleString();
+    return `<div class="h-row">
+      <div class="h-label">${monthLabel(m.month)}</div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+        <div class="h-track" style="height:20px"><div class="h-fill" style="width:${totalWidth}%;background:linear-gradient(90deg,var(--accent),#a29bfe)"><span class="h-fill-text">总 ${totalVal}</span></div></div>
+        <div class="h-track" style="height:20px"><div class="h-fill" style="width:${myWidth}%;background:linear-gradient(90deg,var(--green),#00b894)"><span class="h-fill-text">我 ${myVal}</span></div></div>
+      </div>
+    </div>`;
   }).join('');
 }
 
@@ -1011,12 +1240,15 @@ function renderYearly() {
   if (!yearly.length) { document.getElementById('yearSection').innerHTML = '<div class="year-section"><h3>年度汇总</h3><div class="empty-state">暂无数据</div></div>'; return; }
   document.getElementById('yearSection').innerHTML = `<div class="year-section"><h3>年度汇总</h3><div class="year-grid">${yearly.map(d => {
     return `<div class="year-card"><div class="year-title">${d.year}年</div>
-      <div class="year-row"><span class="yr-label">投资总额</span><span class="yr-val">${fmtMoney(d.invested)}</span></div>
+      <div class="year-row"><span class="yr-label">总本金</span><span class="yr-val">${fmtMoney(d.invested)}</span></div>
+      <div class="year-row"><span class="yr-label">我的本金</span><span class="yr-val">${fmtMoney(d.myInvested)}</span></div>
       <div class="year-row"><span class="yr-label">投资笔数</span><span class="yr-val">${d.count} 笔</span></div>
       <div class="year-row"><span class="yr-label">已回款</span><span class="yr-val">${d.returnedCount} 笔</span></div>
-      <div class="year-row"><span class="yr-label">已收利息</span><span class="yr-val" style="color:var(--green)">${fmtMoney(d.finalInterest)}</span></div>
+      <div class="year-row"><span class="yr-label">已收总利息</span><span class="yr-val" style="color:var(--green)">${fmtMoney(d.finalInterest)}</span></div>
+      <div class="year-row"><span class="yr-label">我的已收利息</span><span class="yr-val" style="color:var(--green)">${fmtMoney(d.myFinalInterest)}</span></div>
       <div class="year-row"><span class="yr-label">服务费</span><span class="yr-val">${fmtMoney(d.serviceFee)}</span></div>
-      <div class="year-row"><span class="yr-label">年化收益率</span><span class="yr-val" style="color:var(--accent)">${(d.annualizedYield || 0).toFixed(2)}%</span></div>
+      <div class="year-row"><span class="yr-label">总年化收益率</span><span class="yr-val" style="color:var(--accent)">${(d.annualizedYield || 0).toFixed(2)}%</span></div>
+      <div class="year-row"><span class="yr-label">我的年化收益率</span><span class="yr-val" style="color:var(--accent)">${(d.myAnnualizedYield || 0).toFixed(2)}%</span></div>
     </div>`;
   }).join('')}</div></div>`;
 }
@@ -1037,10 +1269,10 @@ function renderPartnerStats() {
           <div class="year-title">${d.name}</div>
           <div class="year-row"><span class="yr-label">累计出资</span><span class="yr-val">${fmtMoney(d.amount)}</span></div>
           <div class="year-row"><span class="yr-label">参与笔数</span><span class="yr-val">${d.count} 笔</span></div>
-          <div class="year-row"><span class="yr-label">应得利息</span><span class="yr-val" style="color:var(--green)">${fmtMoney(d.interest)}</span></div>
+          <div class="year-row"><span class="yr-label">合作方应得利息</span><span class="yr-val" style="color:var(--green)">${fmtMoney(d.interest)}</span></div>
           <div class="year-row"><span class="yr-label">我的累计出资</span><span class="yr-val">${fmtMoney(d.myAmount)}</span></div>
           <div class="year-row"><span class="yr-label">我的应得利息</span><span class="yr-val" style="color:var(--green)">${fmtMoney(d.myInterest)}</span></div>
-          <div class="year-row"><span class="yr-label">${d.name}收益率</span><span class="yr-val" style="color:var(--accent)">${(d.yieldRate || 0).toFixed(2)}%</span></div>
+          <div class="year-row"><span class="yr-label">合作方年化收益率</span><span class="yr-val" style="color:var(--accent)">${(d.annualizedYield || 0).toFixed(2)}%</span></div>
         </div>`;
       }).join('')}</div>
     </div>`;
@@ -1052,13 +1284,15 @@ const pageSize = 15;
 
 function renderRecord(r) {
   const actualDays = r.actualDate ? daysBetween(r.date, r.actualDate) : null;
+  const myPlannedInterest = splitInterest(r.interest, r.amount, r.partnerAmount || 0).mine;
+  const myFinalInterest = r.finalInterest != null ? splitInterest(r.finalInterest, r.amount, r.partnerAmount || 0).mine : null;
   let statusTag, daysBadge = '-';
   if (r.returned) { statusTag = '<span class="tag returned">已回款</span>'; }
   else { const d = daysToNow(r.returnDate); const cls = d < 0 ? 'overdue' : d <= 7 ? 'near' : 'far'; const txt = d < 0 ? `${Math.abs(d)}天逾期` : d === 0 ? '今日到期' : `${d}天后`; statusTag = `<span class="tag ${cls}">${cls === 'overdue' ? '逾期' : '待回款'}</span>`; daysBadge = `<span class="days-badge ${cls}">${txt}</span>`; }
   const actionHtml = r.returned
-    ? `<button class="btn-icon" onclick="openEditModal(${r.id})">✎</button><button class="btn-icon danger" onclick="openDeleteModal(${r.id})">✕</button>`
+    ? `<button class="btn btn-outline btn-sm" onclick="openReturnModal(${r.id})">改回款</button><button class="btn-icon" onclick="openEditModal(${r.id})">✎</button><button class="btn-icon danger" onclick="openDeleteModal(${r.id})">✕</button>`
     : `<button class="btn btn-green btn-sm" onclick="openReturnModal(${r.id})">回款</button><button class="btn-icon" onclick="openEditModal(${r.id})">✎</button><button class="btn-icon danger" onclick="openDeleteModal(${r.id})">✕</button>`;
-  return { actualDays, statusTag, daysBadge, actionHtml };
+  return { actualDays, myPlannedInterest, myFinalInterest, statusTag, daysBadge, actionHtml };
 }
 
 function renderTable() {
@@ -1067,12 +1301,12 @@ function renderTable() {
   document.getElementById('totalCount').textContent = tableMeta.total || 0;
 
   const tbody = document.getElementById('tableBody');
-  if (!pageData.length) { tbody.innerHTML = '<tr><td colspan="14"><div class="empty-state">没有匹配的记录</div></td></tr>'; }
-  else { tbody.innerHTML = pageData.map(r => { const { actualDays, statusTag, daysBadge, actionHtml } = renderRecord(r); const remarkText = [r.partnerName ? `${r.partnerName} ¥${fmt(r.partnerAmount || 0)}` : '', r.remark || ''].filter(Boolean).join(' | '); return `<tr><td>${shortDate(r.date)}</td><td class="amount">¥${fmt(r.amount)}</td><td>${r.rate}</td><td>${r.days||'-'}</td><td class="actual-days">${actualDays != null ? actualDays+'天' : '-'}</td><td>${shortDate(r.returnDate)}</td><td>${r.actualDate ? shortDate(r.actualDate) : '-'}</td><td class="amount">¥${fmt(r.interest)}</td><td>${statusTag}</td><td>${daysBadge}</td><td class="amount">${r.finalInterest != null ? '¥'+fmt(r.finalInterest) : '-'}</td><td>${r.toLaoTan ? '¥'+r.toLaoTan : '-'}</td><td class="remark" title="${remarkText||''}">${remarkText||'-'}</td><td><div class="action-cell">${actionHtml}</div></td></tr>`; }).join(''); }
+  if (!pageData.length) { tbody.innerHTML = '<tr><td colspan="16"><div class="empty-state">没有匹配的记录</div></td></tr>'; }
+  else { tbody.innerHTML = pageData.map(r => { const { actualDays, myPlannedInterest, myFinalInterest, statusTag, daysBadge, actionHtml } = renderRecord(r); const remarkText = [r.partnerName ? `${r.partnerName} ¥${fmt(r.partnerAmount || 0)}` : '', r.remark || ''].filter(Boolean).join(' | '); return `<tr><td>${shortDate(r.date)}</td><td class="amount">¥${fmt(r.amount)}</td><td>${r.rate}</td><td>${r.days||'-'}</td><td class="actual-days">${actualDays != null ? actualDays+'天' : '-'}</td><td>${shortDate(r.returnDate)}</td><td>${r.actualDate ? shortDate(r.actualDate) : '-'}</td><td class="amount">¥${fmt(r.interest)}</td><td class="amount">¥${fmt(myPlannedInterest)}</td><td>${statusTag}</td><td>${daysBadge}</td><td class="amount">${r.finalInterest != null ? '¥'+fmt(r.finalInterest) : '-'}</td><td class="amount">${myFinalInterest != null ? '¥'+fmt(myFinalInterest) : '-'}</td><td>${r.toLaoTan ? '¥'+r.toLaoTan : '-'}</td><td class="remark" title="${remarkText||''}">${remarkText||'-'}</td><td><div class="action-cell">${actionHtml}</div></td></tr>`; }).join(''); }
 
   const cards = document.getElementById('mobileCards');
   if (!pageData.length) { cards.innerHTML = '<div class="empty-state">没有匹配的记录</div>'; }
-  else { cards.innerHTML = pageData.map(r => { const { actualDays, statusTag, daysBadge, actionHtml } = renderRecord(r); const d = r.returned ? 0 : daysToNow(r.returnDate); const cls = r.returned ? 'highlight' : (d < 0 ? 'danger' : d <= 7 ? 'warn' : ''); const partnerText = r.partnerName ? `${r.partnerName} ¥${fmt(r.partnerAmount || 0)}` : ''; const bottomText = [r.toLaoTan ? '服务费¥' + r.toLaoTan : '', partnerText, r.remark || ''].filter(Boolean).join(' | '); return `<div class="m-card"><div class="m-card-top"><div><span class="m-card-date">${shortDate(r.date)}</span> ${statusTag}</div><div class="m-card-amount">¥${fmt(r.amount)}</div></div><div class="m-card-grid"><div><div class="m-label">利息/万</div><div class="m-val">${r.rate}</div></div><div><div class="m-label">计划天数</div><div class="m-val">${r.days||'-'}</div></div><div><div class="m-label">实际天数</div><div class="m-val" style="color:var(--blue)">${actualDays != null ? actualDays+'天' : '-'}</div></div><div><div class="m-label">利息总额</div><div class="m-val">¥${fmt(r.interest)}</div></div><div><div class="m-label">计划回款</div><div class="m-val">${shortDate(r.returnDate)}</div></div><div><div class="m-label">实际回款</div><div class="m-val">${r.actualDate ? shortDate(r.actualDate) : '-'}</div></div><div><div class="m-label">最终利息</div><div class="m-val ${cls}">${r.finalInterest != null ? '¥'+fmt(r.finalInterest) : '-'}</div></div><div><div class="m-label">距回款</div><div class="m-val">${daysBadge}</div></div></div><div class="m-card-bottom"><div class="m-card-remark">${bottomText}</div><div class="m-card-actions">${actionHtml}</div></div></div>`; }).join(''); }
+  else { cards.innerHTML = pageData.map(r => { const { actualDays, myPlannedInterest, myFinalInterest, statusTag, daysBadge, actionHtml } = renderRecord(r); const d = r.returned ? 0 : daysToNow(r.returnDate); const cls = r.returned ? 'highlight' : (d < 0 ? 'danger' : d <= 7 ? 'warn' : ''); const partnerText = r.partnerName ? `${r.partnerName} ¥${fmt(r.partnerAmount || 0)}` : ''; const bottomText = [r.toLaoTan ? '服务费¥' + r.toLaoTan : '', partnerText, r.remark || ''].filter(Boolean).join(' | '); return `<div class="m-card"><div class="m-card-top"><div><span class="m-card-date">${shortDate(r.date)}</span> ${statusTag}</div><div class="m-card-amount">¥${fmt(r.amount)}</div></div><div class="m-card-grid"><div><div class="m-label">利息/万</div><div class="m-val">${r.rate}</div></div><div><div class="m-label">计划天数</div><div class="m-val">${r.days||'-'}</div></div><div><div class="m-label">实际天数</div><div class="m-val" style="color:var(--blue)">${actualDays != null ? actualDays+'天' : '-'}</div></div><div><div class="m-label">计划总利息</div><div class="m-val">¥${fmt(r.interest)}</div></div><div><div class="m-label">我的计划利息</div><div class="m-val">¥${fmt(myPlannedInterest)}</div></div><div><div class="m-label">计划回款</div><div class="m-val">${shortDate(r.returnDate)}</div></div><div><div class="m-label">实际回款</div><div class="m-val">${r.actualDate ? shortDate(r.actualDate) : '-'}</div></div><div><div class="m-label">实际总利息</div><div class="m-val ${cls}">${r.finalInterest != null ? '¥'+fmt(r.finalInterest) : '-'}</div></div><div><div class="m-label">我的实际利息</div><div class="m-val ${cls}">${myFinalInterest != null ? '¥'+fmt(myFinalInterest) : '-'}</div></div><div><div class="m-label">距回款</div><div class="m-val">${daysBadge}</div></div></div><div class="m-card-bottom"><div class="m-card-remark">${bottomText}</div><div class="m-card-actions">${actionHtml}</div></div></div>`; }).join(''); }
 
   const pag = document.getElementById('pagination');
   if (totalPages <= 1) { pag.innerHTML = ''; return; }
